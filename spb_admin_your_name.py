@@ -168,11 +168,115 @@ def add_customer():
             else:
                 print("Invalid choice. Please enter Y for Yes or N for No.")
 
-def add_job():
-    # Add a Job to a customer
-    # Remember to validate part and service ids
 
-    pass  # REMOVE this line once you have some function code (a function must have one line of code, so this temporary line keeps Python happy so you can run the code)
+def add_job():
+    # Loop to select a valid customer ID or exit to main menu
+    while True:
+        list_customers()  # Display all customers
+        customer_id = input("Enter the customer ID to add job for, or 'X' to exit: ")
+
+        # Exit the function if the user chooses to exit to the main menu
+        if customer_id.upper() == 'X':
+            return
+
+        # Check if the entered customer ID is valid
+        if customer_id.isdigit() and int(customer_id) in db_customers:
+            customer_id = int(customer_id)
+            break
+        else:
+            print("Invalid Customer ID. Please try again.")
+
+    # Initialize lists to store selected services and parts, and a variable for total cost
+    selected_services = []
+    selected_parts = []
+    total_cost = 0.0
+
+    # Main loop for adding services or parts to the job
+    while True:
+        print("\nOptions for adding to job:")
+        print(" 1 - Add Service")
+        print(" 2 - Add Part")
+        print(" 3 - Finish and Review Bill")
+        choice = input("Enter your choice: ").upper()
+
+        # Handling addition of services or parts
+        if choice in ['1', '2']:
+            while True:
+                # Add service or part based on the user's choice
+                if choice == '1':
+                    list_services()
+                    option_id = input("Enter the Service ID to add, or 'B' to go back: ")
+                    db_option = db_services
+                else:
+                    list_parts()
+                    option_id = input("Enter the Part ID to add, or 'B' to go back: ")
+                    db_option = db_parts
+
+                # Allow the user to go back to the previous menu
+                if option_id.upper() == 'B':
+                    break
+                # Validate the selected service or part ID and add it to the job
+                if option_id.isdigit() and int(option_id) in db_option:
+                    option_id = int(option_id)
+                    if choice == '1':
+                        selected_services.append(option_id)
+                    else:
+                        selected_parts.append(option_id)
+                    total_cost += db_option[option_id][1]
+                    total_cost = round(total_cost, 2)  # Round the total cost to 2 decimal places
+                    
+                    print(f"Added {db_option[option_id][0]} to the job.")
+
+                    # Ask the user if they want to continue adding items
+                    continue_adding = input("Do you want to continue adding items? (Y/N): ").upper()
+                    if continue_adding == 'N':
+                        break
+                else:
+                    print("Invalid ID. Please try again.")
+
+        # Handle the completion and review of the bill
+        elif choice == '3':
+            if not selected_services and not selected_parts:
+                print("No services or parts added. Exiting to main menu.")
+                return
+
+            # Display bill details
+            print_bill(customer_id, selected_services, selected_parts, total_cost)
+
+            # Confirm the addition of the job
+            confirm = input("\nConfirm job addition? (Y/N): ").upper()
+            if confirm == 'Y':
+                job_date = datetime.date.today()
+                db_customers[customer_id]['jobs'][job_date] = (tuple(selected_services), tuple(selected_parts), total_cost, False)
+                print("Job added successfully.")
+            else:
+                print("Job addition cancelled.")
+
+            return
+
+# Function to print the bill details
+def print_bill(customer_id, selected_services, selected_parts, total_cost):
+    print(f"\nClient name: {db_customers[customer_id]['details'][0]}")
+    print("Job details:")
+    print(f"  Date: {datetime.date.today()}")
+    print("--------------------------------------------------")
+    if selected_services:
+        print("  Services:")
+        print("  ID | Name                      |        Cost")
+        for sid in selected_services:
+            print(f"  {sid} | {db_services[sid][0]:<25} | {db_services[sid][1]:>10.2f}")
+    if selected_parts:
+        print("--------------------------------------------------")
+        print("  Parts:")
+        print("  ID | Name                      |        Cost")
+        for pid in selected_parts:
+            print(f"  {pid} | {db_parts[pid][0]:<25} | {db_parts[pid][1]:>10.2f}")
+    print("--------------------------------------------------")
+    print(f"  Total Cost: {total_cost:.2f}")
+
+
+
+
 
 def bills_to_pay():
     # Display a heading for the output
