@@ -71,59 +71,58 @@ def list_customers():
 
     input("\nPress Enter to continue.")     # Pauses the code to allow the user to see the output
 
-
-
 def list_parts():
-    # List the ID, name, cost of all parts
+    # List the ID, name, cost of all parts in alphabetical order
    
     # Convert the dictionary data into a list that displays the required data fields
-    #initialise an empty list which will be used to pass data for display
     display_list = []
-    #Iterate over all the parts in the dictionary
+    
+    # Iterate over all the parts in the dictionary and append them to the display list
     for part in db_parts.keys():
-        #append to the display list the ID, Name, Cost
         display_list.append((part,
                              db_parts[part][0],
-                             db_parts[part][1],
-                             ))
-    format_columns = "{: >4} | {: <15} | {: <12} "
-    print("\nPart LIST\n")    # display a heading for the output
-    column_output(display_list, col_parts, format_columns)   # An example of how to call column_output function
+                             db_parts[part][1]))
 
-    input("\nPress Enter to continue.")     # Pauses the code to allow the user to see the output
+    # Sort the display list by the name of the part (second element of each tuple)
+    display_list.sort(key=lambda x: x[1])
+
+    format_columns = "{: >4} | {: <15} | {: <12} "
+    print("\nPart LIST\n")  # Display a heading for the output
+    column_output(display_list, col_parts, format_columns)  # Call column_output function to display
+
+    input("\nPress Enter to continue.")  # Pause to allow the user to see the output
 
 def list_services():
-    # List the ID, name, cost of all services
+    # List the ID, name, cost of all services in alphabetical order
     
-   # Convert the dictionary data into a list that displays the required data fields
-    #initialise an empty list which will be used to pass data for display
     display_list = []
     
-    #Iterate over all the services in the dictionary
+    # Iterate over all the services in the dictionary and append them to the display list
     for service in db_services.keys():
-        #append to the display list the ID, Service's name, cost
         display_list.append((service,
                              db_services[service][0],
-                             db_services[service][1]
-                            ))
+                             db_services[service][1]))
+
+    # Sort the display list by the name of the service (second element of each tuple)
+    display_list.sort(key=lambda x: x[1])
+
     format_columns = "{: >4} | {: <22} | {: <12} "
-    print("\nService LIST\n")    # display a heading for the output
-    column_output(display_list, col_services, format_columns)   # An example of how to call column_output function
+    print("\nService LIST\n")  # Display a heading for the output
+    column_output(display_list, col_services, format_columns)  # Call column_output function to display
 
-    input("\nPress Enter to continue.")     # Pauses the code to allow the user to see the output
-
-
-# def add_customer():
-    # Add a customer to the db_customers database, use the next_id to get an id for the customer.
-    # Remember to add all required dictionaries.
-
-    pass  # REMOVE this line once you have some function code (a function must have one line of code, so this temporary line keeps Python happy so you can run the code)
+    input("\nPress Enter to continue.")  # Pause to allow the user to see the output
 
 
 def add_customer():
     while True:
         print("\n== Add Customer ==")
-        name = input("\nEnter customer's name: ")
+        while True:
+            name = input("\nEnter customer's name: ").strip()
+            if name=='':
+                print("Customer name can not be empty")
+                continue
+            else:
+                break
         
         while True:
             phone_number = input("Enter customer's phone number: ")
@@ -155,6 +154,7 @@ def add_customer():
         }
     
         print(f"\nCustomer {name} added successfully with ID {new_customer_id}.")
+        # print(db_customers)
 
         # Ask user whether to add a new customer. 
         # If Y is selected, continue to add new customer's infomation. 
@@ -247,7 +247,7 @@ def add_job():
             confirm = input("\nConfirm job addition? (Y/N): ").upper()
             if confirm == 'Y':
                 job_date = datetime.date.today()
-                db_customers[customer_id]['jobs'][job_date] = (tuple(selected_services), tuple(selected_parts), total_cost, False)
+                db_customers[customer_id]['jobs'][job_date] =[tuple(selected_services), tuple(selected_parts), total_cost, False]
                 print("Job added successfully.")
             else:
                 print("Job addition cancelled.")
@@ -273,9 +273,6 @@ def print_bill(customer_id, selected_services, selected_parts, total_cost):
             print(f"  {pid} | {db_parts[pid][0]:<25} | {db_parts[pid][1]:>10.2f}")
     print("--------------------------------------------------")
     print(f"  Total Cost: {total_cost:.2f}")
-
-
-
 
 
 def bills_to_pay():
@@ -345,6 +342,7 @@ def pay_bill():
             # Enter the bill date to choose pay the bill,or not
             # Enter "B", back to customer list
             # Enter "X", back to main menu
+            print (db_customers)
             bill_date_input = input("\nEnter the date of the bill to pay (YYYY-MM-DD), 'B' to go back, or 'X' to exit: ")
             if bill_date_input.upper() == 'B':
                 break  
